@@ -19,7 +19,6 @@ You can decode input with any process.
 
 ## Configuration
 
-- **mode**: plugin mode (enum(pipe), required)
 - **command**: exec command (string, required)
 
 ## Example
@@ -29,7 +28,6 @@ in:
   type: any output input plugin type
   decoders:
     - type: exec
-      mode: pipe
       command: lzop -dc
 ```
 

@@ -23,15 +23,9 @@ import org.embulk.spi.util.InputStreamFileInput;
 public class ExecDecoderPlugin
         implements DecoderPlugin
 {
-    public enum Mode {
-        pipe,
-    };
     public interface PluginTask
             extends Task
     {
-        @Config("mode")
-        Mode getMode();
-
         @Config("command")
         String getCommand();
 
