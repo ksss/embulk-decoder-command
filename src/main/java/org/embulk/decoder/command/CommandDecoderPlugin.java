@@ -1,4 +1,4 @@
-package org.embulk.decoder.exec;
+package org.embulk.decoder.command;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -20,7 +20,7 @@ import org.embulk.spi.FileInput;
 import org.embulk.spi.util.FileInputInputStream;
 import org.embulk.spi.util.InputStreamFileInput;
 
-public class ExecDecoderPlugin
+public class CommandDecoderPlugin
         implements DecoderPlugin
 {
     public interface PluginTask

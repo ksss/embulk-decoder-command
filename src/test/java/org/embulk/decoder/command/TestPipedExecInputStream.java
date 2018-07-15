@@ -1,4 +1,4 @@
-package org.embulk.decoder.exec;
+package org.embulk.decoder.command;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -10,7 +10,7 @@ import java.io.FileNotFoundException;
 
 import com.google.common.io.Resources;
 
-import org.embulk.decoder.exec.PipedExecInputStream;
+import org.embulk.decoder.command.PipedExecInputStream;
 
 public class TestPipedExecInputStream
 {
@@ -55,6 +55,6 @@ public class TestPipedExecInputStream
 
     private static InputStream resource(String name) throws IOException
     {
-        return Resources.getResource("org/embulk/decoder/exec/" + name).openStream();
+        return Resources.getResource("org/embulk/decoder/command/" + name).openStream();
     }
 }

@@ -76,11 +76,11 @@ Gem::Specification.new do |spec|
   spec.name          = "${project.name}"
   spec.version       = "${project.version}"
   spec.authors       = ["ksss"]
-  spec.summary       = %[Exec decoder plugin for Embulk]
-  spec.description   = %[Decodes Exec-encoded files read by other file input plugins.]
+  spec.summary       = %[Command decoder plugin for Embulk]
+  spec.description   = %[Decodes any files read by other file input plugins.]
   spec.email         = ["co000ri@gmail.com"]
   spec.licenses      = ["MIT"]
-  spec.homepage      = "https://github.com/ksss/embulk-decoder-exec"
+  spec.homepage      = "https://github.com/ksss/embulk-decoder-command"
 
   spec.files         = `git ls-files`.split("\n") + Dir["classpath/*.jar"]
   spec.test_files    = spec.files.grep(%r"^(test|spec)/")

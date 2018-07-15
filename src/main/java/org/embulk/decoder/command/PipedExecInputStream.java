@@ -1,4 +1,4 @@
-package org.embulk.decoder.exec;
+package org.embulk.decoder.command;
 
 import java.io.InputStream;
 import java.io.OutputStream;
