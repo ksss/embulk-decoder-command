@@ -18,7 +18,8 @@ public class PipedExecInputStream extends InputStream
     {
         this.file = file;
         this.command = command;
-        this.process = Runtime.getRuntime().exec(command);
+        String[] cmdary = {"sh", "-c", command};
+        this.process = Runtime.getRuntime().exec(cmdary);
         this.in = process.getInputStream();
         this.out = process.getOutputStream();
         this.err = process.getErrorStream();
