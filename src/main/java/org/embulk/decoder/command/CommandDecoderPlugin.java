@@ -2,67 +2,66 @@ package org.embulk.decoder.command;
 
 import java.io.InputStream;
 import java.io.IOException;
-import java.io.PipedOutputStream;
-import java.io.PipedInputStream;
 
-import com.google.common.base.Optional;
-
-import org.embulk.config.Config;
-import org.embulk.config.ConfigDefault;
-import org.embulk.config.ConfigInject;
 import org.embulk.config.ConfigSource;
-import org.embulk.config.Task;
 import org.embulk.config.TaskSource;
-import org.embulk.config.ConfigException;
-import org.embulk.spi.BufferAllocator;
 import org.embulk.spi.DecoderPlugin;
+import org.embulk.spi.Exec;
 import org.embulk.spi.FileInput;
-import org.embulk.spi.util.FileInputInputStream;
-import org.embulk.spi.util.InputStreamFileInput;
+import org.embulk.util.config.Config;
+import org.embulk.util.config.ConfigMapper;
+import org.embulk.util.config.ConfigMapperFactory;
+import org.embulk.util.config.Task;
+import org.embulk.util.config.TaskMapper;
+import org.embulk.util.file.FileInputInputStream;
+import org.embulk.util.file.InputStreamFileInput;
 
 public class CommandDecoderPlugin
         implements DecoderPlugin
 {
+    private static final ConfigMapperFactory CONFIG_MAPPER_FACTORY =
+            ConfigMapperFactory.builder().addDefaultModules().build();
+    private static final ConfigMapper CONFIG_MAPPER = CONFIG_MAPPER_FACTORY.createConfigMapper();
+    private static final TaskMapper TASK_MAPPER = CONFIG_MAPPER_FACTORY.createTaskMapper();
+
     public interface PluginTask
             extends Task
     {
         @Config("command")
         String getCommand();
-
-        @ConfigInject
-        public BufferAllocator getBufferAllocator();
     }
 
     @Override
     public void transaction(ConfigSource config, DecoderPlugin.Control control)
     {
-        PluginTask task = config.loadConfig(PluginTask.class);
-
-        control.run(task.dump());
+        final PluginTask task = CONFIG_MAPPER.map(config, PluginTask.class);
+        control.run(task.toTaskSource());
     }
 
     @Override
     public FileInput open(TaskSource taskSource, FileInput fileInput)
     {
-        final PluginTask task = taskSource.loadTask(PluginTask.class);
+        final PluginTask task = TASK_MAPPER.map(taskSource, PluginTask.class);
 
         final FileInputInputStream files = new FileInputInputStream(fileInput);
 
         return new InputStreamFileInput(
-               task.getBufferAllocator(),
-               new InputStreamFileInput.Provider() {
-                   public InputStream openNext() throws IOException
-                   {
-                       if (!files.nextFile()) {
-                           return null;
-                       }
-                       return new PipedExecInputStream(files, task.getCommand());
-                   }
+                Exec.getBufferAllocator(),
+                new InputStreamFileInput.Provider() {
+                    @Override
+                    public InputStream openNext() throws IOException
+                    {
+                        if (!files.nextFile()) {
+                            return null;
+                        }
+                        return new PipedExecInputStream(files, task.getCommand());
+                    }
 
-                   public void close() throws IOException
-                   {
-                       files.close();
-                   }
-               });
+                    @Override
+                    public void close() throws IOException
+                    {
+                        files.close();
+                    }
+                });
     }
 }

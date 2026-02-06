@@ -2,7 +2,9 @@
 
 Command decoder plugin for Embulk.
 
-Embulk decoder plugin that exec another process.
+Embulk decoder plugin that executes another process.
+
+This plugin supports Embulk `0.11` only.
 
 This plugin implement like this command image.
 
@@ -18,6 +20,7 @@ You can decode input with any process.
 
 * **Plugin type**: decoder
 * **Guess supported**: no
+* **Embulk compatibility**: 0.11
 
 ## Configuration
 
@@ -31,13 +34,6 @@ in:
   decoders:
     - type: command
       command: lzop -dc
-```
-
-(If guess supported) you don't have to write `decoder:` section in the configuration file. After writing `in:` section, you can let embulk guess `decoder:` section using this command:
-
-```
-$ embulk gem install embulk-decoder-command
-$ embulk guess -g exec config.yml -o guessed.yml
 ```
 
 ## Build
