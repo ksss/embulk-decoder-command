@@ -1,95 +1,44 @@
 plugins {
-    id "com.jfrog.bintray" version "1.1"
-    id "com.github.jruby-gradle.base" version "0.1.5"
-    id "java"
-    id "checkstyle"
+    id "java-library"
+    id "org.embulk.embulk-plugins" version "0.7.0"
 }
-import com.github.jrubygradle.JRubyExec
+
+group = "org.embulk.decoder"
+version = "0.3.0"
+description = "Decodes files by piping each input through an external command."
+
+sourceCompatibility = 8
+targetCompatibility = 8
+compileJava.options.encoding = "UTF-8"
+
 repositories {
     mavenCentral()
-    jcenter()
-}
-configurations {
-    provided
 }
 
-version = "0.2.0"
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+embulkPlugin {
+    mainClass = "org.embulk.decoder.command.CommandDecoderPlugin"
+    category = "decoder"
+    type = "command"
+}
 
 dependencies {
-    compile  "org.embulk:embulk-core:0.9.4"
-    provided "org.embulk:embulk-core:0.9.4"
-    // compile "YOUR_JAR_DEPENDENCY_GROUP:YOUR_JAR_DEPENDENCY_MODULE:YOUR_JAR_DEPENDENCY_VERSION"
-    testCompile "junit:junit:4.+"
+    compileOnly "org.embulk:embulk-spi:0.11"
+
+    implementation "org.embulk:embulk-util-config:0.5.0"
+    implementation "org.embulk:embulk-util-file:0.2.0"
+
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "org.embulk:embulk-spi:0.11"
+    testImplementation "org.embulk:embulk-core:0.11.0"
+    testImplementation "org.embulk:embulk-deps:0.11.0"
+    testImplementation "org.embulk:embulk-junit4:0.11.0"
 }
 
-task classpath(type: Copy, dependsOn: ["jar"]) {
-    doFirst { file("classpath").deleteDir() }
-    from (configurations.runtime - configurations.provided + files(jar.archivePath))
-    into "classpath"
+gem {
+    authors = [ "ksss" ]
+    summary = "Command decoder plugin for Embulk"
+    description = "Decodes input by piping each file through an external command."
+    email = [ "co000ri@gmail.com" ]
+    licenses = [ "MIT" ]
+    homepage = "https://github.com/ksss/embulk-decoder-command"
 }
-clean { delete "classpath" }
-
-checkstyle {
-    configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
-    toolVersion = '6.14.1'
-}
-checkstyleMain {
-    configFile = file("${project.rootDir}/config/checkstyle/default.xml")
-    ignoreFailures = true
-}
-checkstyleTest {
-    configFile = file("${project.rootDir}/config/checkstyle/default.xml")
-    ignoreFailures = true
-}
-task checkstyle(type: Checkstyle) {
-    classpath = sourceSets.main.output + sourceSets.test.output
-    source = sourceSets.main.allJava + sourceSets.test.allJava
-}
-
-task gem(type: JRubyExec, dependsOn: ["gemspec", "classpath"]) {
-    jrubyArgs "-rrubygems/gem_runner", "-eGem::GemRunner.new.run(ARGV)", "build"
-    script "${project.name}.gemspec"
-    doLast { ant.move(file: "${project.name}-${project.version}.gem", todir: "pkg") }
-}
-
-task gemPush(type: JRubyExec, dependsOn: ["gem"]) {
-    jrubyArgs "-rrubygems/gem_runner", "-eGem::GemRunner.new.run(ARGV)", "push"
-    script "pkg/${project.name}-${project.version}.gem"
-}
-
-task "package"(dependsOn: ["gemspec", "classpath"]) {
-    doLast {
-        println "> Build succeeded."
-        println "> You can run embulk with '-L ${file(".").absolutePath}' argument."
-    }
-}
-
-task gemspec {
-    ext.gemspecFile = file("${project.name}.gemspec")
-    inputs.file "build.gradle"
-    outputs.file gemspecFile
-    doLast { gemspecFile.write($/
-Gem::Specification.new do |spec|
-  spec.name          = "${project.name}"
-  spec.version       = "${project.version}"
-  spec.authors       = ["ksss"]
-  spec.summary       = %[Command decoder plugin for Embulk]
-  spec.description   = %[Decodes any files read by other file input plugins.]
-  spec.email         = ["co000ri@gmail.com"]
-  spec.licenses      = ["MIT"]
-  spec.homepage      = "https://github.com/ksss/embulk-decoder-command"
-
-  spec.files         = `git ls-files`.split("\n") + Dir["classpath/*.jar"]
-  spec.test_files    = spec.files.grep(%r"^(test|spec)/")
-  spec.require_paths = ["lib"]
-
-  spec.add_development_dependency 'bundler', ['~> 1.0']
-  spec.add_development_dependency 'rake', ['>= 10.0']
-end
-/$)
-    }
-}
-clean { delete "${project.name}.gemspec" }

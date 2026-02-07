@@ -3,6 +3,7 @@
 /tmp/
 *.gemspec
 .gradle/
+.gradle-home/
 /classpath/
 build/
 .idea
